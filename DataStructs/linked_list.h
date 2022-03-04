@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <iostream>
+#include <memory>
 
 template <typename T>
 class Linked_List;
@@ -26,6 +27,7 @@ public:
 
 	Node(T d)
 		: next(nullptr), data(d) {}
+
 };
 
 template <typename T>
@@ -51,18 +53,35 @@ public:
 
 	Linked_List()
 	{
+
 		this->clear_();
 		std::cout << "LinkedList created..." << std::endl;
 	}
 
+    Linked_List(std::initializer_list<T> items)
+    {
+        if (items.size() != 0)
+        {
+            auto it = items.begin();
+			this->head->data = (*it);
+            size++; // added first item
+            Node<T> *current = head;
+            ++it;
+            for (; it != items.end(); ++it)
+            {
+                current->next->data = (*it);
+                current = current->next;
+                size++;
+            }
+        }
+    };
 	~Linked_List()
 	{
-		Node<T> *e = this->head;
-		while (e != nullptr)
+		while (head)
 		{
-			// clear(e->data);
-			Node<T> *tmp = e;
-			e = e->next;
+			//clear(e);
+			Node<T> *tmp = head;
+			head = head->next;
 			delete tmp;
 		}
 	}
@@ -109,25 +128,40 @@ public:
 		std::cout << value << " not found" << std::endl;
 		return nullptr;
 	}
-	bool remove(T value)
-	{
-		Node<T> *n = head;
-		while (n->next != nullptr)
-		{
 
-			if (n->next->data == value)
-			{
+	void remove( T data) {
+		if (this->size == 0) {
+			std::cout << "List ist Empty ... " << std::endl;
+		}
 
-				auto *tmp = n->next;
-				n->next = n->next->next;
+		if (this->head->data == data) {
+			Node<T> *current = head;
+			this->head = this->head->next;
+			std::cout << data << " has been removed ..." << std::endl;
+			delete current;
+			this->size--;
+		} else {
+			Node<T> *prev = this->head;
+			Node<T> *current = head->next;
 
-				std::cout << tmp->data << " has been removed" << std::endl;
-				delete n;
-				size--;
-				return true;
+			while(current != nullptr) {
+				if(current -> data == data) {
+					break;
+				} else {
+					prev = current;
+					current = current->next;
+				}
+			}
+
+			if(current == nullptr) {
+				std::cout << "Value " << data << " not found in the List ..." << std::endl;
+			} else {
+				prev->next = current->next;
+				std::cout << data << " has been removed ..." << std::endl;
+				delete current;
+				this->size--;
 			}
 		}
-		return false;
 	}
 
 	T *search_idx(int idx)
@@ -234,7 +268,9 @@ public:
 
 		iterator &operator++()
 		{
-			this->current = this->current->next;
+			if (this->current != nullptr) {
+				this->current = this->current->next;
+			}
 			return *this;
 		}
 
@@ -243,7 +279,7 @@ public:
 
 	iterator begin()
 	{
-		return iterator(this);
+		return iterator(this->head);
 	}
 	iterator end()
 	{

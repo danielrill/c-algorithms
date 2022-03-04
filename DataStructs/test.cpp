@@ -92,15 +92,16 @@ void sharedPtrTest()
 
 void linkedlistTest()
 {
-    Node<int> *x = new Node<int>(5);
+    int x = 7;
+    Node<int> *y = new Node<int>(x);
 
     Linked_List<int> *list = new Linked_List<int>();
     list->add(5);
-    list->insert(x);
+    list->insert(y);
 
     Linked_List<int> listaa(delete_node);
     listaa.add(5);
-    listaa.insert(x);
+    listaa.insert(y);
     for (int i = 0; i < 20; i++)
     {
         list->add(i);
@@ -123,15 +124,23 @@ void linkedlistTest()
 
     Node<int> *f = listaa.search_node(2);
     std::cout << f->data << std::endl;
-    listaa.remove(1);
+ 
+    listaa.remove(4);
+    listaa.remove(0);
+    listaa.remove(2);
 
     std::cout << listaa << std::endl;
+    
+    
+    for ( auto *e : listaa) {
+        listaa.remove(*e);
+    }
+    std::cout << listaa << std::endl;
+    delete y;
+    delete list;
 
-    /*
-    TODO
-    for e in list
-        remove e
-    */
+    Linked_List<int> *initList =new Linked_List<int>{12, 44, 123, 22, 31, 55};
+    std::cout << initList << std::endl;
 }
 
 int main()
