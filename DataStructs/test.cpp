@@ -101,7 +101,6 @@ void linkedlistTest()
 
     Linked_List<int> listaa(delete_node);
     listaa.add(5);
-    listaa.insert(y);
     for (int i = 0; i < 20; i++)
     {
         list->add(i);
@@ -121,26 +120,55 @@ void linkedlistTest()
     listaa.search_node(21);
     listaa += (44);
     std::cout << listaa << std::endl;
-
-    Node<int> *f = listaa.search_node(2);
-    std::cout << f->data << std::endl;
  
     listaa.remove(4);
     listaa.remove(0);
-    listaa.remove(2);
+    listaa.remove(5);
+    listaa.remove(5);
+    listaa.remove(1);
+
+    std::cout << listaa << std::endl;
+    listaa.add(5);
+    listaa.add(6);
+    listaa.add(8);
+   
 
     std::cout << listaa << std::endl;
     
-    
+    std::cout << listaa.get_last().data << " last object"<< std::endl;
+
     for ( auto *e : listaa) {
-        listaa.remove(*e);
+        
+        std::cout << *e << std::endl;
+        
     }
-    std::cout << listaa << std::endl;
+
+    listaa.erase_idx(15);
+    std::cout << listaa.get_size() << " list size" << std::endl;
+    listaa.erase_idx(listaa.get_size());
+    listaa.erase_idx(1);
+
+    std::cout << listaa  << " empty ? "<< std::endl;
+
+
+    std::cout << listaa.get(0)->data << " list at 0" << std::endl;
+    std::cout << listaa.get(1)->data << " list at 1" << std::endl;
+    std::cout << listaa.get(2)->data << " list at 2" << std::endl;
+    std::cout << listaa.get(3)->data << " list at 3" << std::endl;
+    std::cout << listaa.get(16)->data << " list at 16" << std::endl;
+    std::cout << listaa.get(listaa.get_size()-1)->data << " list at 16" << std::endl;
+
+    std::cout << listaa.get_size() << " list size" << std::endl;
+
+
+    std::cout << listaa  << " empty ? "<< std::endl;
     delete y;
     delete list;
 
-    Linked_List<int> *initList =new Linked_List<int>{12, 44, 123, 22, 31, 55};
-    std::cout << initList << std::endl;
+    
+
+    //Linked_List<int> initList = {12, 44, 123, 22, 31, 55};
+    //std::cout << initList << std::endl;
 }
 
 int main()
