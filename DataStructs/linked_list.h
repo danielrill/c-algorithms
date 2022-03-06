@@ -1,9 +1,14 @@
+/*
+	Not complete as of <06.03.2022>
+	Author: Daniel Rill
+*/
+
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
 #include <iterator>
 #include <iostream>
-#include <memory>
+
 
 template <typename T>
 class Linked_List;
@@ -17,6 +22,9 @@ class Node final
 	friend class Linked_List<T>;
 	friend class iterator;
 
+	//Node<T>(const T& d) : next(nullptr), data(d) { }
+	//Node<T>(T&& d) : next(nullptr), data(std::forward<T>(d)) { }
+
 protected:
 public:
 	Node<T> *next;
@@ -28,14 +36,21 @@ public:
 	Node(T d)
 		: next(nullptr), data(d) {}
 
+	friend std::ostream &operator<<(std::ostream &os, Node &node)
+	{
+		Node<T> e = node;
+		os << " {" ;
+		os << e.data << ", " << e.next << " }";
+		return os;
+	}
 };
+
+
 
 template <typename T>
 class Linked_List final
 {
-	
-	Linked_List(const Linked_List &) = delete;
-	Linked_List &operator=(const Linked_List &) = delete;
+	// No Move-Semantics 
 	Linked_List(Linked_List &&) = delete;
 	Linked_List &operator=(Linked_List &&) = delete;
 
@@ -45,6 +60,10 @@ private:
 	void (*clear)(Node<T> *);
 
 public:
+
+	/*
+		Three different constructors
+	*/
 	explicit Linked_List(void (*)(Node<T> *))
 		: head(nullptr), clear()
 	{
@@ -59,52 +78,97 @@ public:
 		std::cout << "LinkedList created..." << std::endl;
 	}
 
-	// Still a bit messy
-	// Needs a quick fix
+	// TODO: Sort the Entries during init
     Linked_List(std::initializer_list<T> items)
-    : head(nullptr)
+    //: head(nullptr)
 	{
-		if(items.size() == 0)
-			return;
+		if(items.size() != 0)
+		{	
+            auto it = items.begin();
+            head = new Node<T>(*it); // first item
+            size++; 
+            Node<T>* current = head;
+            ++it;
+            for (; it != items.end(); ++it)
+            {
+				
+				//for(current = head; current->next && current->next->data <*it; current = current->next)
+				//	continue;
 
-		auto it = items.begin();
-		for (head = new Node<T>(*it); it != items.end(); it++) {
-			Node<T> *n = new Node<T>(*it);
-			Node<T> *curr;
-			for(curr = head; curr->next && curr->next->data <*it; curr = curr->next)
-				continue;
-			if(*it < curr->data) {
-				n->next = curr;
-				head = n;
-			} else {
-				n->next = curr->next;
-				curr->next = n;
-			}
+				current->next = new Node<T>(*it);
+                current = current->next;
+                size++;
+
+            }
 		}
 	}
 
-	// Copy constructor 
+	
+/* First approach doesnt work as expected, 2nd does not sort 
+
+auto it = items.begin();
+head = new Node<T>(*it);
+for (; it != items.end(); ++it) {
+	Node<T> *n = new Node<T>(*it);
+	this->size++;
+	Node<T> *curr;
+	std::cout << n << ", " << curr << " , " << *it << std::endl;
+	for(curr = head; curr->next && curr->next->data <*it; curr = curr->next)
+		continue;
+	if(*it < curr->data) {
+		n->next = curr;					
+		head = n;
+	} else {
+		n->next = curr->next;
+		curr->next = n;
+		}
+	}
+
+auto it = listOfItems.begin();
+head = std::make_unique<Node>(*it);
+size++; // added first item
+Node* current = head.get();
+++it;
+for (; it != listOfItems.end(); ++it)
+{
+    current->next = std::make_unique<Node>(*it);
+    current = current->next.get();
+    size++;
+}
+*/
 /*
+	Copy-Semantics
+*/
+
 	Linked_List(const Linked_List &list)
+	: head(nullptr), size(0)
 	{
 		std::cout << " *** COPY *** " << std::endl;
-		if (list.head == nullptr)
-			return;
 
-		head = list.head;
-		Node<T> *current = head;
-		size = 1;
+		Node<T> **current = &head;
 
-		Node<T> *listCurrent = list.head->next;
-		while (listCurrent != nullptr)
+		for(Node<T> *e = list.head; e; e = e->next)
 		{
-			current->next = listCurrent->next;
-			listCurrent = listCurrent->next;
-			current = current->next;
+			(*current) = new Node<T>(e->data);
+			current = &(*current)->next;
 			size++;
-		}
-		
+		}	
 	}
+	Linked_List<T>& operator=(Linked_List const& list)
+	{
+		Linked_List<T> temp(list);
+		temp.swap(*this);
+		return *this;
+	}
+
+	void swap(Linked_List<T>& other)
+	{
+		using std::swap;
+		swap(head,  other.head);
+    	swap(size,    other.size);
+	}
+	/*
+		Destructor
 	*/
 	~Linked_List()
 	{
@@ -117,16 +181,27 @@ public:
 		}
 	}
 
+	/*
+		Clear the list 
+		used in constructor
+	*/
 	void clear_()
 	{
 		this->size = 0;
 		this->head = nullptr;
 	}
 
+	/*
+		return the size of the List
+	*/
 	int get_size() {
 		return this->size;
 	}
 
+	/*
+		insert a Node 
+		Returns a new List
+	*/
 	Linked_List &insert(Node<T> *e)
 	{
 		if (head == nullptr || e->data < head->data)
@@ -148,6 +223,11 @@ public:
 		}
 	}
 
+	/*
+		Search a specific Value
+		stops at first occurence
+	*/
+
 	Node<T> *search_node(T value)
 	{
 		Node<T> *e = head;
@@ -164,6 +244,10 @@ public:
 		return nullptr;
 	}
 
+	/*
+		Erase a Node at a given index
+		return Type probably should be changed
+	*/
 	Node<T>* erase_idx( int idx ) {
 
 		Node<T> *temp = head;
@@ -188,6 +272,7 @@ public:
 			
 			this->size--;
 			return head;
+			
 		}
 		// Last object
 		if (idx == this->size) {
@@ -220,6 +305,11 @@ public:
 		return head;
 
 	}
+
+	/*
+		Remove a given value
+		stops at first occurence
+	*/
 
 	void remove( T data) {
 		if (this->size == 0) {
@@ -256,7 +346,9 @@ public:
 		}
 	}
 
-
+	/*
+		add a Node with given Value in a sorted manner
+	*/
 	void add(T value)
 	{
 		if (head == nullptr || value < head->data)
@@ -279,6 +371,17 @@ public:
 		}
 	}
 
+	/*
+		get the data of a given Node
+	*/
+
+	T* get_data(Node<T> *n) const {
+		return n->data;
+	}
+
+	/*
+		return a Node at a given index
+	*/
 	Node<T> *get(int idx) const
 	{
 		Node<T> *temp = head;
@@ -319,35 +422,79 @@ public:
 		return e;
 	}
 
-	Node<T> get_last() const
+	/*
+		returns the last Node
+	*/
+	Node<T> *get_last() const
 	{
 		Node<T> *p = head;
 		for (int i = 0; i < size-1; i++)
 		{
 			p = p->next;
 		}
-		return *p;
+		return p;
 	}
 
+	/*
+		returns the int size of the List
+		probably better with size_t
+	*/
 	int get_size() const
 	{
 		return this->size;
 	}
 
+	/*
+		not really usefull
+	*/
 	Node<T> *operator[](int idx) const {
 		return this->get(idx);
 	}
 
+	/*
+		add a value by simply += operator
+	*/
 	void operator+=(T value)
 	{
 		this->add(value);
 	}
-
+	/*
+		remove a value by simply -= operator
+	*/
 	void operator-=(T value)
 	{
 		this->remove(value);
 	}
 
+	/*
+		prints the List at a given width
+		probably usefull to give thw width as param
+	*/
+	void print_list() const
+	{
+		if (this->get_size() != 0)
+		{
+			int count = 0;
+			Node<T> *current = head;
+			while (current != nullptr) {
+				if(count % 20 != 0) 
+				{
+					std::cout << current->data << ", ";
+					current = current->next;
+					count++;
+				} else {
+					std::cout << '\n' << current->data << ", ";
+					current = current->next;
+					count++;
+				}
+			}
+			std::cout << "( " << this->get_size() << " Entries in the List )"<< std::endl;
+		}
+	}
+
+	/*
+		returns an output stream
+	*/
 	friend std::ostream &operator<<(std::ostream &os, Linked_List &list)
 	{
 		os << "{ ";
@@ -361,6 +508,9 @@ public:
 		return os;
 	}
 
+	/*
+		The nested iterator class
+	*/
 	class iterator final
 	{
 	protected:
@@ -388,6 +538,11 @@ public:
 			return &this->current->data;
 		}
 
+		T &operator->() const
+		{
+			return this->current->data;
+		}
+
 		iterator &operator++()
 		{
 			if (this->current != nullptr) {
@@ -395,10 +550,12 @@ public:
 			}
 			return *this;
 		}
-
+		/*
+			sometimes useful 
+		*/
 		iterator &operator++(int)
 		{
-			iterator temp = *this;
+			auto temp = *this;
 			++*this;
 			return temp;
 		}
@@ -416,4 +573,4 @@ public:
 	}
 };
 
-#endif
+#endif // Linked_List

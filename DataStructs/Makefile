@@ -12,6 +12,7 @@ TARGET = test
 HEADER = myArray.h \
                   mySharedPtr.h \
                   linked_list.h \
+				  Binary_Heap.h \
                   
 
 all: $(TARGET)

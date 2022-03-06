@@ -1,11 +1,8 @@
-#ifndef TEST_CPP
-#define TEST_CPP
 
 #include "mySharedPtr.h"
 #include "myArray.h"
 #include "linked_list.h"
-//#include "linked_list.cpp"
-//#include "myList.h"
+#include "Binary_Heap.h"
 #include <iostream>
 #include <string>
 
@@ -101,11 +98,18 @@ void linkedlistTest()
 
     Linked_List<int> listaa(delete_node);
     listaa.add(5);
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 30; i++)
     {
         list->add(i);
         listaa.add(i);
     }
+
+    Linked_List<int> initList = {11, 44, 123, 22, 31, 55};
+    for (auto *e : initList) 
+    {
+        std::cout << *e << std::endl;
+    }
+    //std::cout << initList << std::endl;
 
     for (auto *n : listaa)
     {
@@ -114,6 +118,14 @@ void linkedlistTest()
             std::cout << *n << std::endl;
         }
     }
+
+    Linked_List<int> ll = listaa;
+    for (auto *e : ll)
+        std::cout << *e << std::endl;
+    
+    Node<int> *e = ll.get_last();
+    std::cout << *e << std::endl;
+    std::cout << *ll.get_last() << std::endl;
 
     std::cout << listaa << std::endl;
     listaa.search_node(7);
@@ -135,7 +147,7 @@ void linkedlistTest()
 
     std::cout << listaa << std::endl;
     
-    std::cout << listaa.get_last().data << " last object"<< std::endl;
+    std::cout << listaa.get_last()->data << " last object"<< std::endl;
 
     for ( auto *e : listaa) {
         
@@ -143,10 +155,16 @@ void linkedlistTest()
         
     }
 
+    auto it = list->begin();
+    for (; it != list->end(); it++) {
+        std::cout << *it << " , "<< &it << std::endl;
+    }
+
     listaa.erase_idx(15);
     std::cout << listaa.get_size() << " list size" << std::endl;
     listaa.erase_idx(listaa.get_size());
-    listaa.erase_idx(1);
+    Node<int> *g = listaa.erase_idx(1);
+    std::cout << *g << " erased Node" << std::endl;
 
     std::cout << listaa  << " empty ? "<< std::endl;
 
@@ -156,7 +174,7 @@ void linkedlistTest()
     std::cout << listaa.get(2)->data << " list at 2" << std::endl;
     std::cout << listaa.get(3)->data << " list at 3" << std::endl;
     std::cout << listaa.get(16)->data << " list at 16" << std::endl;
-    std::cout << listaa.get(listaa.get_size()-1)->data << " list at 16" << std::endl;
+    std::cout << listaa.get(listaa.get_size()-1)->data << " list at end" << std::endl;
 
     std::cout << listaa.get_size() << " list size" << std::endl;
 
@@ -166,15 +184,26 @@ void linkedlistTest()
     delete list;
 
     
+    listaa.print_list();
+    //list->print_list();
+}
 
-    //Linked_List<int> initList = {12, 44, 123, 22, 31, 55};
-    //std::cout << initList << std::endl;
+void binary_heapTest()
+{
+    Binary_Heap<int> heap;
+    heap.insert(5);
+    for (size_t i = 0; i < 12; i++)
+        heap.insert(i);
+
+    std::cout << "heap size is " << heap.getSize() << std::endl;
+    heap.print_heap();
+
 }
 
 int main()
 {
-
-    linkedlistTest();
+    binary_heapTest();
+    //linkedlistTest();
     // arrayTest();
     // sharedPtrTest();
 }
@@ -187,4 +216,3 @@ namespace
         delete n;
     }
 }
-#endif
